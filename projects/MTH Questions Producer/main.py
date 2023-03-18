@@ -23,6 +23,14 @@ def isFloat(number): # function checking if value is a float
     else:
         return False
 # end of "isFloat" function
+
+def removeDuplicates(listOfItemsToBeRemoved, listOfItemsBeingComparedWith): 
+    for i in listOfItemsBeingComparedWith:
+        if i in listOfItemsToBeRemoved:
+            listOfItemsToBeRemoved.remove(i)
+    # end of for loop (i)
+    return listOfItemsToBeRemoved
+# end of "removeDuplicates" function    
             
     
 def expandRange(beginRange, endRange): # takes in two values and outputs the range
@@ -95,12 +103,8 @@ def sortProblemsIntoList(problems):
 # end of "sortProblemsIntoList" function
 
 
-def produceProblems(problems, uniqueProblemsDesired):
+def produceProblems(problems, uniqueProblemsDesired):  
     newProblems = []
-    
-    if len(problems) < uniqueProblemsDesired: # if there are not enough problems to accommodate the desired length, changing the length to the max number of problems
-        uniqueProblemsDesired = len(problems)
-    
     i = 0 # counter for while loop
     while i < uniqueProblemsDesired:
         randomIndex = random.randint(0, len(problems) - 1)
@@ -119,8 +123,28 @@ def convertFromStringToDouble(problems):
 # end of "convertFromStringToDouble" function
 
 
-def printList(problemsToPrint):
-    return 0
+def randomizeList(listOfProblems):
+    return random.sample(listOfProblems, len(listOfProblems))
+# end of "randomizeList" function
+
+
+def printList(problemsToPrint, numberOfItemsForPrint = None): # prints the values in the list and returns the amount of values that were printed yet desired
+    numberOfProblemsDesiredAndNotPrinted = 0 
+    if numberOfItemsForPrint > 0: # only printing values if the number of items to print is greater than zero
+        numberOfItemsForPrint = int(numberOfItemsForPrint) # changing numberOfItemsForPrint variable to a integer
+        if numberOfItemsForPrint != None: # only printing the number of items specified if there are enough in the list # changing my return value
+            if numberOfItemsForPrint > len(problemsToPrint): # if the number of problems desired exceeds the length of the list, update it
+                numberOfProblemsDesiredAndNotPrinted = numberOfItemsForPrint - len(problemsToPrint)
+                numberOfItemsForPrint = len(problemsToPrint)
+            for i in range(0,numberOfItemsForPrint): # looping through each item and printing
+                print(problemsToPrint[i], end = " ") 
+            # end of for loop (i)
+        elif numberOfItemsForPrint == None: # if the number of items was not specified, printing the entire list and returning zero
+            for j in problemsToPrint:
+                print(j , end = " ")
+            return 0
+            # end of for loop (j)
+    return numberOfProblemsDesiredAndNotPrinted # returning number of items desired but not printed due to smaller list size
 # end of "printList" function
 
 
@@ -130,8 +154,8 @@ def getInputFromUser(allProblems, problemsMarkedForReview):
     numberOfProblems = input("Please enter the number of problems you would like: ")
     
     if isFloat(numberOfProblems): # alerting user if float was entered
-        print("You entered a float. Changing ", float(numberOfProblems), " to int: " , int(float(numberOfProblems)))  
-    
+        print("You entered a float. Changing ", float(numberOfProblems), " to int: " , int(float(numberOfProblems))) 
+         
     numberOfProblems = int(float(numberOfProblems)) # Changing number of Problems to integer
     
     if numberOfProblems <= 0: # ensuring that the value entered is larger than 0 and not a float
@@ -141,59 +165,35 @@ def getInputFromUser(allProblems, problemsMarkedForReview):
     # using the "sortProblemsIntoList" function to isolate each problem from the string
     allProblems = sortProblemsIntoList(allProblems)
     problemsMarkedForReview = sortProblemsIntoList(problemsMarkedForReview)
-    
-    allProblemsGreaterThanZero = len(allProblems) > 0
-    problemsMarkedForReviewGreaterThanZero = len(problemsMarkedForReview) > 0
 
-    
-    # Producing Problems 
-    if allProblemsGreaterThanZero:
-            allProblemsProduced = produceProblems(allProblems, numberOfProblems)
-        
-    if problemsMarkedForReviewGreaterThanZero:
-        problemsMarkedForReviewProduced = produceProblems(problemsMarkedForReview, numberOfProblems)
-    
-    
+    # shuffling values in the lists to random locations
+    allProblemsRandomized = randomizeList(allProblems)
+    problemsMarkedForReviewRandomized = randomizeList(problemsMarkedForReview)
+
     # Printing List to User
     if problemSelection == '0': # user wants all problems
-        if problemsMarkedForReviewGreaterThanZero:
-            i = 0
-            j = 0
-            count = 0
-            while count < numberOfProblems:
-                
-                if i < len(problemsMarkedForReviewProduced):
-                    print(problemsMarkedForReviewProduced[i], end = " ")
-                    i += 1
-                    count += 1
-                elif j < len(allProblemsProduced):
-                    print(allProblemsProduced[j], end = " ")
-                    j += 1
-                    count += 1
-                else:
-                    break
-            
-            
-        #     for i in problemsMarkedForReviewProduced:
-        #         print(i , end = " ") 
-        # if allProblemsGreaterThanZero:
-        #     for i in allProblemsProduced:
-        #         print(i , end = " ")           
-    
+        removeDuplicates(allProblemsRandomized, problemsMarkedForReviewRandomized) # removing any values that exist in problems marked for review out of the all problems list so that the user is receiving unique problems from both lists
+        print("\n------------------------------------------\n")
+        numberOfProblems = printList(problemsMarkedForReviewRandomized, numberOfProblems)
+        numberOfProblems = printList(allProblemsRandomized, numberOfProblems)
+        print("\n\n------------------------------------------\n")
+        if numberOfProblems > 0:
+                print("Sorry. Number of problems desired is greater than the amount available. We printed what we could.") 
     elif problemSelection == '1': # user wants only problems marked for review
-        if problemsMarkedForReviewGreaterThanZero:
-            for i in problemsMarkedForReviewProduced:
-                print(i , end = " ") 
+        if len(problemsMarkedForReviewRandomized) > 0:
+            numberOfProblems = printList(problemsMarkedForReview, numberOfProblems)
+            if numberOfProblems > 0:
+                print("Sorry. Number of problems desired is greater than the amount marked for review. We printed what we could.") 
         else:
             endProgram("Sorry; there are no review problems.")      
    
     else: 
-        endProgram()
+        endProgram("You must enter either a 0 or 1; ending program.")
 # end of "getInputFromUser" function       
 
 #"4.10: 470-472, 474-477, 479, 481, 484, 490-497, 499-503", "1.1: 2-11, 42-43", "1.1: 12-15, 20-21, 24-26"
 # String Array of Homework Problems    
-allproblems = ["4.10: 470-472, 474-477, 479, 481, 484, 490-497, 499-503", "1.1: 2-11, 42-43", "1.1: 12-15, 20-21, 24-26", "Quiz3: 1-10"]
-problemsMarkedForReview = ["Quiz3: 1-10"]
+allproblems = ["4.10: 470-472, 474-477, 479, 481, 484, 490-497, 499-503", "1.1: 2-11, 42-43", "1.1: 12-15, 20-21, 24-26", "Quiz3: 100-120"]
+problemsMarkedForReview = ["Quiz3: 100-120"]
 newProblems = sortProblemsIntoList(allproblems)
 getInputFromUser(allproblems, problemsMarkedForReview)
